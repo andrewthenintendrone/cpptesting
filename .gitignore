@@ -21,9 +21,13 @@
 x64/
 x86/
 bld/
+[Bbuild]/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+[Ii]nclude/
+cpptesting/[Bb]uild/
+Markov Chains/[Bb]uild/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="source\main.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BARS.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\bprmFile.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Color.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Image.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Model.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Byaml.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\FFM.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\BARS.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\bprmFile.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Color.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Image.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\SignedDistanceField.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Array2D.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Endian.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Model.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Byaml.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\FFM.h">
+      <Filter>source</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="source">
+      <UniqueIdentifier>{9ddf6fd7-2d87-4e6f-b831-6acc8ee442a4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
