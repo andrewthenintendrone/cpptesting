@@ -1,17 +1,38 @@
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include "Image.h"
 #include "Model.h"
 #include <string>
-#include <experimental\filesystem>
-namespace fs = std::experimental::filesystem;
+#include "Array2D.h"
+
+bool ColorSort(Color& a, Color& b)
+{
+	if (a.g <= b.g)
+	{
+		return true;
+	}
+	return false;
+}
 
 int main(int argc, char* argv[])
 {
-	for(int i = 1; i < argc; i++)
+	if (argc > 1)
 	{
-		Model model;
-		model.loadRaw(argv[i], 0, 0);
-		model.writeOBJ(std::string("C:\\Users\\Andrew\\Desktop\\model.obj").c_str());
+		for (int i = 1; i < argc; i++)
+		{
+			Image img(argv[i]);
+
+			std::string filename = argv[i];
+
+			filename = filename.substr(0, filename.length() - 4) + "_sobel.png";
+
+			img.gaussianBlur().sobelEdgeDetection().save(filename.c_str());
+		}
 	}
 
-	system("pause");
+
+	std::cin.get();
+
 	return 0;
 }

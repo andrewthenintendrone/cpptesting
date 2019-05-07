@@ -1,6 +1,7 @@
 #include "FFM.h"
 #include "Endian.h"
 
+// generic read function
 template <typename T>
 T read(std::ifstream& stream)
 {
@@ -10,13 +11,13 @@ T read(std::ifstream& stream)
 }
 
 // constructor with filename
-FFM::FFM(const char* filename)
+FFM::FFM(const std::string& filename)
 {
 	loadFFM(filename);
 }
 
 // load and read from the ffm file
-void FFM::loadFFM(const char* filename)
+void FFM::loadFFM(const std::string& filename)
 {
 	// open file in binary mode (don't create it)
 	std::ifstream file;
@@ -144,7 +145,7 @@ void FFM::loadFFM(const char* filename)
 	file.close();
 }
 
-void FFM::writeFile(const char* filename)
+void FFM::writeFile(const std::string& filename)
 {
 	std::ofstream file;
 	file.open(filename, std::ios::trunc);

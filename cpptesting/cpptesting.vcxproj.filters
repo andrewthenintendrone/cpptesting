@@ -25,6 +25,18 @@
     <ClCompile Include="source\FFM.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="source\BFSTM.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BinaryReader.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BinaryWriter.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Nutexb.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\BARS.h">
@@ -55,6 +67,21 @@
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="source\FFM.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\BFSTM.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\BinaryReader.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\BinaryWriter.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Nutexb.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\NutexImageFormat.h">
       <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>

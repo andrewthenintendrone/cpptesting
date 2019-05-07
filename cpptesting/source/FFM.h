@@ -5,29 +5,35 @@
 #include <glm\matrix.hpp>
 #include <vector>
 
+// Candy crush friends FFM file
 class FFM
 {
 public:
 
 	FFM() {};
-	FFM(const char* filename);
+	FFM(const std::string& filename);
 
-	void loadFFM(const char* filename);
+	void loadFFM(const std::string& filename);
 
-	void writeFile(const char* filename);
+	void writeFile(const std::string& filename);
 
 private:
 
-	// array of indices used for faces
+	// indices
 	std::vector<glm::ivec3> m_faceArray;
-	// array of vertex positions
+
+	// verts
 	std::vector<glm::vec3> m_vertexArray;
-	// array of vertex normals
+
+	// normals
 	std::vector<glm::vec3> m_normalArray;
-	// array of vertex tangents
+
+	// tangents
 	std::vector<glm::vec3> m_tangentArray;
-	// array of vertex bitangents
+
+	// bitangents
 	std::vector<glm::vec3> m_bitangentArray;
-	// array of texture coordinates
+
+	// uvs
 	std::vector<glm::vec2> m_texCoordArray;
 };

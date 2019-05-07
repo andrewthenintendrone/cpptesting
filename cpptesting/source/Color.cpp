@@ -26,6 +26,22 @@ Color::Color(uint32_t hexCode)
 	a = chunks[0];
 }
 
+Color::Color(glm::vec3 vec3)
+{
+	r = (uint8_t)(vec3.r * 255.0f);
+	g = (uint8_t)(vec3.g * 255.0f);
+	b = (uint8_t)(vec3.b * 255.0f);
+	a = (uint8_t)255;
+}
+
+Color::Color(glm::vec4 vec4)
+{
+	r = (uint8_t)(vec4.r * 255.0f);
+	g = (uint8_t)(vec4.g * 255.0f);
+	b = (uint8_t)(vec4.b * 255.0f);
+	a = (uint8_t)(vec4.a * 255.0f);
+}
+
 glm::vec3 Color::asVec3() const
 {
 	return glm::vec3((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f);
@@ -43,7 +59,11 @@ void Color::operator=(const Color& other)
 
 Color Color::operator + (const Color& other) const
 {
-	return Color(value + other.value);
+	uint8_t r2 = std::min(((uint16_t)r + (uint16_t)other.r), 255);
+	uint8_t g2 = std::min(((uint16_t)g + (uint16_t)other.g), 255);
+	uint8_t b2 = std::min(((uint16_t)b + (uint16_t)other.b), 255);
+
+	return Color(r2, g2, b2);
 }
 
 void Color::operator += (const Color& other)
@@ -53,12 +73,23 @@ void Color::operator += (const Color& other)
 
 Color Color::operator - (const Color& other) const
 {
-	return Color(value - other.value);
+	uint8_t r2 = std::max(((int16_t)r - (int16_t)other.r), 0);
+	uint8_t g2 = std::max(((int16_t)g - (int16_t)other.g), 0);
+	uint8_t b2 = std::max(((int16_t)b - (int16_t)other.b), 0);
+
+	return Color(r2, g2, b2);
 }
 
 void Color::operator -= (const Color& other)
 {
 	value -= other.value;
+}
+
+Color Color::operator * (const Color& other) const
+{
+	glm::vec4 multiplied = this->asVec4() * other.asVec4();
+
+	return Color(multiplied);
 }
 
 float Color::getHue()
@@ -114,8 +145,6 @@ float Color::getSaturation()
 
 	float C = M - m;
 
-	float S;
-
 	if (C == 0.0f)
 	{
 		return 0.0f;
@@ -134,6 +163,49 @@ float Color::getValue()
 	V = std::max<float>(V, B);
 
 	return V;
+}
+
+Color Color::convertFromBGR555(uint16_t bgr)
+{
+	Color c;
+
+	c.r = (bgr & (uint16_t)0x001f) * (uint16_t)0x08;
+	c.g = ((bgr & (uint16_t)0x03e0) >> 5) * (uint16_t)0x08;
+	c.b = ((bgr & (uint16_t)0x7c00) >> 10) * (uint16_t)0x08;
+	c.a = (bgr >> 15) * 255;
+
+	return c;
+}
+
+uint16_t Color::convertToGBR555(Color color)
+{
+	uint16_t bgr = (color.r / (uint16_t)0x08);
+	bgr |= (color.g / (uint16_t)0x08) << 5;
+	bgr |= (color.b / (uint16_t)0x08) << 10;
+	bgr |= (color.a / 255) << 15;
+
+	return bgr;
+}
+
+Color Color::convertFromBGR222(uint8_t bgr)
+{
+	Color c;
+
+	c.r = (bgr & (uint16_t)0x03) * (uint16_t)0x40;
+	c.g = ((bgr & (uint16_t)0x0C) >> 2) * (uint16_t)0x40;
+	c.b = ((bgr & (uint16_t)0x30) >> 4) * (uint16_t)0x40;
+	c.a = 255;
+
+	return c;
+}
+
+uint8_t Color::convertToGBR222(Color color)
+{
+	int8_t byte = (color.r / (uint16_t)64);
+	byte |= (color.g / (uint16_t)64) << 2;
+	byte |= (color.b / (uint16_t)64) << 4;
+
+	return byte;
 }
 
 #pragma region ColorConstants

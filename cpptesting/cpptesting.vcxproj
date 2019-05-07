@@ -137,6 +137,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\BARS.cpp" />
+    <ClCompile Include="source\BFSTM.cpp" />
+    <ClCompile Include="source\BinaryReader.cpp" />
+    <ClCompile Include="source\BinaryWriter.cpp" />
     <ClCompile Include="source\bprmFile.cpp" />
     <ClCompile Include="source\Byaml.cpp" />
     <ClCompile Include="source\Color.cpp" />
@@ -144,10 +147,14 @@
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\Image.cpp" />
     <ClCompile Include="source\Model.cpp" />
+    <ClCompile Include="source\Nutexb.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Array2D.h" />
     <ClInclude Include="source\BARS.h" />
+    <ClInclude Include="source\BFSTM.h" />
+    <ClInclude Include="source\BinaryReader.h" />
+    <ClInclude Include="source\BinaryWriter.h" />
     <ClInclude Include="source\bprmFile.h" />
     <ClInclude Include="source\Byaml.h" />
     <ClInclude Include="source\Color.h" />
@@ -155,6 +162,8 @@
     <ClInclude Include="source\FFM.h" />
     <ClInclude Include="source\Image.h" />
     <ClInclude Include="source\Model.h" />
+    <ClInclude Include="source\Nutexb.h" />
+    <ClInclude Include="source\NutexImageFormat.h" />
     <ClInclude Include="source\SignedDistanceField.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -22,10 +22,21 @@ public:
 
 	void saveSignedDistanceField(const char* filename);
 
-	Color getPixel(int x, int y, WRAPTYPE wrapType);
+	Color getPixel(int x, int y, WRAPTYPE wrapType) const;
 	void setPixel(int x, int y, Color color, WRAPTYPE wrapType);
 
 	void sort();
+
+	Image sobelEdgeDetection();
+	Image gaussianBlur();
+
+	// overloads
+	void operator = (const Image& other);
+	Image operator * (const Image& other) const;
+	void operator *= (const Image& other);
+	Image operator + (const Image& other) const;
+	void operator += (const Image& other);
+	Image operator - (const Image& other) const;
 
 	const int getWidth() { return m_width; }
 	const int getHeight() { return m_height; }
@@ -39,5 +50,5 @@ protected:
 	int m_height = 0;
 	int m_channels = 0;
 
-	unsigned int getPixelOffset(int x, int y, WRAPTYPE wrapType);
+	unsigned int getPixelOffset(int x, int y, WRAPTYPE wrapType) const;
 };

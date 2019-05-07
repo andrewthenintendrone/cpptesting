@@ -28,6 +28,14 @@ bld/
 [Ii]nclude/
 cpptesting/[Bb]uild/
 Markov Chains/[Bb]uild/
+dlls/
+lib/
+include/
+SFML-2.5.1/
+
+*.zip
+*.html
+*.lib
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

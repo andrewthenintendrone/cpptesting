@@ -1,6 +1,7 @@
 #include "MarkovChain.h"
 #include <sstream>
 #include <algorithm>
+#include <iostream>
 
 std::string toLower(const std::string& str)
 {
@@ -17,7 +18,7 @@ std::string toLower(const std::string& str)
 void MarkovChain::buildDictionary(const char* filename)
 {
 	// open file to read in text
-	m_file.open(filename, std::ios::_Nocreate);
+	m_file.open(filename, std::ios::_Nocreate, std::ios::binary);
 
 	if (!m_file.is_open())
 	{
@@ -35,34 +36,37 @@ void MarkovChain::buildDictionary(const char* filename)
 		{
 			nextWord = toLower(peekWord());
 
-			bool exists = false;
-			bool nextExists = false;
-
-			if(m_dictionary.find(currentWord) != m_dictionary.end())
+			if (nextWord != "")
 			{
-				// current word already exists in the dictionary
-				exists = true;
+				bool exists = false;
+				bool nextExists = false;
 
-				// check to make sure nextWord doesn't already exist as a next word for this word
-				if (m_dictionary.find(currentWord)->second.nextWords.find(nextWord) != m_dictionary.find(currentWord)->second.nextWords.end())
+				if (m_dictionary.find(currentWord) != m_dictionary.end())
 				{
-					// next word already exists for this word
-					nextExists = true;
-					m_dictionary.find(currentWord)->second.nextWords[nextWord]++;
+					// current word already exists in the dictionary
+					exists = true;
+
+					// check to make sure nextWord doesn't already exist as a next word for this word
+					if (m_dictionary.find(currentWord)->second.nextWords.find(nextWord) != m_dictionary.find(currentWord)->second.nextWords.end())
+					{
+						// next word already exists for this word
+						nextExists = true;
+						m_dictionary.find(currentWord)->second.nextWords[nextWord]++;
+					}
+
+					// the next word has never been seen before after an instance of the current word
+					if (!nextExists)
+					{
+						// add it as the first occurance
+						m_dictionary.find(currentWord)->second.nextWords[nextWord] = 1;
+					}
 				}
 
-				// the next word has never been seen before after an instance of the current word
-				if (!nextExists)
+				if (!exists)
 				{
-					// add it as the first occurance
-					m_dictionary.find(currentWord)->second.nextWords[nextWord] = 1;
+					// add the current word along with the next word
+					m_dictionary[currentWord] = DictionaryEntry(currentWord, nextWord);
 				}
-			}
-
-			if (!exists)
-			{
-				// add the current word along with the next word
-				m_dictionary[currentWord] = DictionaryEntry(currentWord, nextWord);
 			}
 		}
 	}
@@ -125,8 +129,7 @@ std::string MarkovChain::peekWord()
 	}
 
 	// read next word into a string
-	std::string word;
-	m_file >> word;
+	std::string word = readWord();
 
 	// return to position
 	m_file.seekg(position);
@@ -137,7 +140,7 @@ std::string MarkovChain::peekWord()
 // read a word from the file
 std::string MarkovChain::readWord()
 {
-	std::string word = "";
+	/*std::string word = "";
 	char c;
 
 	while (true)
@@ -155,7 +158,11 @@ std::string MarkovChain::readWord()
 		}
 
 		word += c;
-	}
+	}*/
+
+	std::string word;
+
+	m_file >> word;
 
 	return word;
 }

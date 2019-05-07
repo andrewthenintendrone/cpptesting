@@ -13,6 +13,8 @@ public:
 	Color();
 	Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha);
 	Color(uint32_t hexCode);
+	Color(glm::vec3 vec3);
+	Color(glm::vec4 vec4);
 
 	// union
 	union
@@ -35,10 +37,17 @@ public:
 	void operator += (const Color& other);
 	Color operator - (const Color& other) const;
 	void operator -= (const Color& other);
+	Color operator * (const Color& other) const;
 
 	float getHue();
 	float getSaturation();
 	float getValue();
+
+	static Color convertFromBGR555(uint16_t bgr);
+	static uint16_t convertToGBR555(Color color);
+
+	static Color convertFromBGR222(uint8_t bgr);
+	static uint8_t convertToGBR222(Color color);
 
 #pragma region constants
 

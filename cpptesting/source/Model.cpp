@@ -4,16 +4,13 @@
 #include <math.h>
 #include <algorithm>
 #include "Endian.h"
+#include "BinaryReader.h"
+#include "Image.h"
 
 bool validVector(glm::vec2& v)
 {
 	// not a number
 	if (std::isnan(v.x) || std::isnan(v.y))
-	{
-		return false;
-	}
-	// not normal
-	if (!std::isnormal(v.x) || !std::isnormal(v.y))
 	{
 		return false;
 	}
@@ -28,11 +25,6 @@ bool validVector(glm::vec3& v)
 	{
 		return false;
 	}
-	// not normal
-	if (!std::isnormal(v.x) || !std::isnormal(v.y) || !std::isnormal(v.z))
-	{
-		return false;
-	}
 
 	return true;
 }
@@ -44,68 +36,309 @@ bool validVector(glm::vec4& v)
 	{
 		return false;
 	}
-	// not normal
-	if (!std::isnormal(v.x) || !std::isnormal(v.y) || !std::isnormal(v.z) || !std::isnormal(v.w))
-	{
-		return false;
-	}
 
 	return true;
 }
 
-Model::Model(std::vector<glm::vec3> verts, std::vector<int> indices) : m_verts(verts), m_indices(indices)
+Model::Model(std::vector<glm::vec3> verts, std::vector<glm::vec2> uvs, std::vector<int> indices) : m_verts(verts), m_uvs(uvs), m_indices(indices)
 {
 
 }
 
-void Model::loadRaw(const std::string& filename, int startAddress, int endAddress)
+// returns a bitmask of the surrounding pixels (used for sprite to model)
+uint8_t getCorners(Image* sprite, int x, int y)
 {
-	file.open(filename, std::ios::binary | std::ios::_Nocreate | std::ios::ate);
+	uint8_t corners = 0;
 
-	if (!file.is_open())
+	// top left
+	if (x != 0 && y != sprite->getHeight()- 1 && sprite->getPixel(x - 1, y + 1, WRAP).a > 128)
 	{
-		std::cout << "Failed to open " << filename << std::endl;
-		return;
+		corners |= 128;
 	}
 
-	// store file size
-	int fileSize = (int)file.tellg();
+	// top
+	if (y != sprite->getHeight() - 1 && sprite->getPixel(x, y + 1, WRAP).a > 128)
+	{
+		corners |= 64;
+	}
+
+	// top right
+	if (x != sprite->getWidth() - 1 && y != sprite->getHeight() - 1 && sprite->getPixel(x + 1, y + 1, WRAP).a > 128)
+	{
+		corners |= 32;
+	}
+
+	// left
+	if (x != 0 && sprite->getPixel(x - 1, y, WRAP).a > 128)
+	{
+		corners |= 16;
+	}
+
+	// right
+	if (x != sprite->getWidth() - 1 && sprite->getPixel(x + 1, y, WRAP).a > 128)
+	{
+		corners |= 8;
+	}
+
+	// bottom left
+	if (x != 0 && y == 0 && sprite->getPixel(x - 1, y - 1, WRAP).a > 128)
+	{
+		corners |= 4;
+	}
+
+	// bottom
+	if (y != 0 && sprite->getPixel(x, y - 1, WRAP).a > 128)
+	{
+		corners |= 2;
+	}
+
+	// bottom right
+	if (x != sprite->getWidth() - 1 && y != 0 && sprite->getPixel(x + 1, y - 1, WRAP).a > 128)
+	{
+		corners |= 1;
+	}
+
+	return corners;
+}
+
+Model Model::createModelFromSprite(const std::string& filename, float meshHeight)
+{
+	// create model
+	Model model;
+
+	// open sprite
+	Image img(filename.c_str());
+
+	int opaquePixelCount = 0;
+
+	float longerSide = std::max(img.getWidth(), img.getHeight());
+
+	// add top verts
+	for (int y = 0, i = 0; y < img.getHeight(); y++)
+	{
+		for (int x = 0; x < img.getWidth(); x++, i++)
+		{
+			// if the current pixel is opaque
+			if (img.getPixel(x, y, WRAP).a > 128)
+			{
+				opaquePixelCount++;
+
+				// create verts
+				model.m_verts.push_back(glm::vec3(x - 0.5f, meshHeight * 0.5f, y - 0.5f) / longerSide);
+				model.m_verts.push_back(glm::vec3(x + 0.5f, meshHeight * 0.5f, y - 0.5f) / longerSide);
+				model.m_verts.push_back(glm::vec3(x - 0.5f, meshHeight * 0.5f, y + 0.5f) / longerSide);
+				model.m_verts.push_back(glm::vec3(x + 0.5f, meshHeight * 0.5f, y + 0.5f) / longerSide);
+
+				// create uvs
+				model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+				model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+				model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+				model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+			}
+		}
+	}
+
+	// copy for bottom verts
+	for (int y = 0, i = 0; y < img.getHeight(); y++)
+	{
+		for (int x = 0; x < img.getWidth(); x++, i++)
+		{
+			// if the current pixel is opaque
+			if (img.getPixel(x, y, WRAP).a > 128)
+			{
+				// create verts
+				model.m_verts.push_back(glm::vec3(x - 0.5f, -meshHeight * 0.5f, y - 0.5f) / longerSide);
+				model.m_verts.push_back(glm::vec3(x + 0.5f, -meshHeight * 0.5f, y - 0.5f) / longerSide);
+				model.m_verts.push_back(glm::vec3(x - 0.5f, -meshHeight * 0.5f, y + 0.5f) / longerSide);
+				model.m_verts.push_back(glm::vec3(x + 0.5f, -meshHeight * 0.5f, y + 0.5f) / longerSide);
+
+				// create uvs
+				model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+				model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+				model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+				model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+			}
+		}
+	}
+
+	// create top indices
+	for (int i = 0; i < opaquePixelCount; i++)
+	{
+		int a = i * 4;
+		int b = i * 4 + 1;
+		int c = i * 4 + 2;
+		int d = i * 4 + 3;
+
+		model.m_indices.push_back(c);
+		model.m_indices.push_back(b);
+		model.m_indices.push_back(a);
+
+		model.m_indices.push_back(c);
+		model.m_indices.push_back(d);
+		model.m_indices.push_back(b);
+	}
+
+	// create bottom indices
+	for (int i = 0; i < opaquePixelCount; i++)
+	{
+		int a = opaquePixelCount * 4 + i * 4;
+		int b = opaquePixelCount * 4 + i * 4 + 1;
+		int c = opaquePixelCount * 4 + i * 4 + 2;
+		int d = opaquePixelCount * 4 + i * 4 + 3;
+
+		model.m_indices.push_back(a);
+		model.m_indices.push_back(b);
+		model.m_indices.push_back(c);
+
+		model.m_indices.push_back(b);
+		model.m_indices.push_back(d);
+		model.m_indices.push_back(c);
+	}
+
+	// create edge indices
+	for (int y = 0, i = opaquePixelCount * 8; y < img.getHeight(); y++)
+	{
+		for (int x = 0; x < img.getWidth(); x++)
+		{
+			// only fill in corners for opaque pixels
+			if (img.getPixel(x, y, WRAP).a > 128)
+			{
+				uint8_t corners = getCorners(&img, x, y);
+
+				// top edge
+				if ((corners & 64) != 64)
+				{
+					model.m_verts.push_back(glm::vec3(x - 0.5f, meshHeight * 0.5f, y + 0.5f) / longerSide);
+					model.m_verts.push_back(glm::vec3(x + 0.5f, meshHeight * 0.5f, y + 0.5f) / longerSide);
+					model.m_verts.push_back(glm::vec3(x - 0.5f, -meshHeight * 0.5f, y + 0.5f) / longerSide);
+					model.m_verts.push_back(glm::vec3(x + 0.5f, -meshHeight * 0.5f, y + 0.5f) / longerSide);
+
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+
+					model.m_indices.push_back(i + 2);
+					model.m_indices.push_back(i + 1);
+					model.m_indices.push_back(i);
+
+					model.m_indices.push_back(i + 2);
+					model.m_indices.push_back(i + 3);
+					model.m_indices.push_back(i + 1);
+
+					i += 4;
+				}
+
+				// bottom edge
+				if ((corners & 2) != 2)
+				{
+					model.m_verts.push_back(glm::vec3(x - 0.5f, meshHeight * 0.5f, y - 0.5f) / longerSide);
+					model.m_verts.push_back(glm::vec3(x + 0.5f, meshHeight * 0.5f, y - 0.5f) / longerSide);
+					model.m_verts.push_back(glm::vec3(x - 0.5f, -meshHeight * 0.5f, y - 0.5f) / longerSide);
+					model.m_verts.push_back(glm::vec3(x + 0.5f, -meshHeight * 0.5f, y - 0.5f) / longerSide);
+
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+
+					model.m_indices.push_back(i);
+					model.m_indices.push_back(i + 1);
+					model.m_indices.push_back(i + 2);
+
+					model.m_indices.push_back(i + 1);
+					model.m_indices.push_back(i + 3);
+					model.m_indices.push_back(i + 2);
+
+					i += 4;
+				}
+
+				// left edge
+				if ((corners & 16) != 16)
+				{
+					model.m_verts.push_back(glm::vec3(x - 0.5f, meshHeight * 0.5f, y + 0.5f) / longerSide);
+					model.m_verts.push_back(glm::vec3(x - 0.5f, meshHeight * 0.5f, y - 0.5f) / longerSide);
+					model.m_verts.push_back(glm::vec3(x - 0.5f, -meshHeight * 0.5f, y + 0.5f) / longerSide);
+					model.m_verts.push_back(glm::vec3(x - 0.5f, -meshHeight * 0.5f, y - 0.5f) / longerSide);
+
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+
+					model.m_indices.push_back(i);
+					model.m_indices.push_back(i + 1);
+					model.m_indices.push_back(i + 2);
+
+					model.m_indices.push_back(i + 1);
+					model.m_indices.push_back(i + 3);
+					model.m_indices.push_back(i + 2);
+
+					i += 4;
+				}
+
+				// right edge
+				if ((corners & 8) != 8)
+				{
+					model.m_verts.push_back(glm::vec3(x + 0.5f, meshHeight * 0.5f, y - 0.5f) / longerSide);
+					model.m_verts.push_back(glm::vec3(x + 0.5f, meshHeight * 0.5f, y + 0.5f) / longerSide);
+					model.m_verts.push_back(glm::vec3(x + 0.5f, -meshHeight * 0.5f, y - 0.5f) / longerSide);
+					model.m_verts.push_back(glm::vec3(x + 0.5f, -meshHeight * 0.5f, y + 0.5f) / longerSide);
+
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+					model.m_uvs.push_back(glm::vec2((float)x / (float)(img.getWidth() - 1.0f), 1.0f - (float)y / (float)(img.getHeight() - 1.0f)));
+
+					model.m_indices.push_back(i);
+					model.m_indices.push_back(i + 1);
+					model.m_indices.push_back(i + 2);
+
+					model.m_indices.push_back(i + 1);
+					model.m_indices.push_back(i + 3);
+					model.m_indices.push_back(i + 2);
+
+					i += 4;
+				}
+			}
+		}
+	}
+
+	// finally center mesh vertices
+	for (int i = 0; i < model.m_verts.size(); i++)
+	{
+		model.m_verts[i] -= glm::vec3(img.getWidth() * 0.5f / longerSide, 0.0f, img.getHeight() * 0.5f / longerSide);
+	}
+
+	return model;
+}
+
+void Model::loadRaw(const std::string& filename, int startAddress /* 0 */, int endAddress /* 0 */)
+{
+	BinaryReader reader(filename);
 
 	// if endAddress is 0 set it to fileSize
 	if (endAddress == 0)
 	{
-		endAddress = fileSize;
+		endAddress = (int)reader.getFileSize();
 	}
 
-	// return to start address
-	file.seekg(startAddress, std::ios::beg);
-
-	int normalCount = 0;
-	int positionCount = 0;
+	uint16_t x = 0;
 
 	// read data as verts 
-	while ((int)file.tellg() < endAddress - sizeof(glm::vec4))
+	while (reader.getFileOffset() < endAddress - sizeof(uint16_t))
 	{
-		glm::vec4 currentVector;
+		uint16_t y = reader.readUint16();
 
-		file.read(reinterpret_cast<char*>(&currentVector), sizeof(glm::vec4));
+		glm::vec3 currentVector((float)x, (float)y, 0);
 
 		if (validVector(currentVector))
 		{
-			if (glm::length(currentVector) == 1.0f)
-			{
-				normalCount++;
-			}
-			else
-			{
-				positionCount++;
-			}
-
 			m_verts.push_back(currentVector);
 		}
-	}
 
-	file.close();
+		x++;
+	}
 }
 
 size_t split(const std::string& txt, std::vector<std::string>& strs, char ch)
@@ -132,6 +365,8 @@ size_t split(const std::string& txt, std::vector<std::string>& strs, char ch)
 // read in obj file
 void Model::loadOBJ(const std::string& filename)
 {
+	std::ifstream file;
+
 	file.open(filename, std::ios::_Nocreate);
 
 	if (!file.is_open())
@@ -192,10 +427,19 @@ void Model::writeOBJ(const std::string& filename)
 		file << "v " << std::setprecision(6) << m_verts[i].x << " " << m_verts[i].y << " " << m_verts[i].z << std::endl;
 	}
 
+	// write uvs (if they exist)
+	for (int i = 0; i < m_uvs.size(); i++)
+	{
+		file << "vt " << std::setprecision(6) << m_uvs[i].x << " " << m_uvs[i].y << std::endl;
+	}
+
 	// write indices
 	for (int i = 0; i < m_indices.size(); i += 3)
 	{
-		file << "f " << m_indices[i] << " " << m_indices[i + 1] << " " << m_indices[i + 2] << std::endl;
+		file << "f ";
+		file << m_indices[i] + 1 << "/" << m_indices[i] + 1 << " ";
+		file << m_indices[i + 1] + 1 << "/" << m_indices[i + 1] + 1 << " ";
+		file << m_indices[i + 2] + 1 << "/" << m_indices[i + 2] + 1 << std::endl;
 	}
 
 	file.close();
