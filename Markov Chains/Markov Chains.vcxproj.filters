@@ -21,18 +21,12 @@
     <ClCompile Include="source\MarkovChain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\CharacterMarkovChain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\DictionaryEntry.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="source\MarkovChain.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\CharacterMarkovChain.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

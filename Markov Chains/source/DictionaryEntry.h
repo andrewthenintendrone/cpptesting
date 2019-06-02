@@ -6,9 +6,9 @@ struct DictionaryEntry
 {
 	DictionaryEntry() { }
 
-	DictionaryEntry(const std::string& w, const std::string& nw)
+	void addNextWord(const std::string& nw)
 	{
-		nextWords[nw] = 1;
+		nextWords[nw]++;
 	}
 
 	// gets a random next word weighted by the number of occurences
@@ -29,12 +29,12 @@ struct DictionaryEntry
 
 		for (auto iter = nextWords.begin(); iter != nextWords.end(); iter++)
 		{
-			currentCheckIndex += iter->second;
-
 			if (currentCheckIndex >= randomIndex)
 			{
 				return iter->first;
 			}
+
+			currentCheckIndex += iter->second;
 		}
 
 		return nextWords.begin()->first;

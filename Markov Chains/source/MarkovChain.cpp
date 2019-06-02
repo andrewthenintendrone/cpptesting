@@ -38,35 +38,35 @@ void MarkovChain::buildDictionary(const char* filename)
 
 			if (nextWord != "")
 			{
-				bool exists = false;
-				bool nextExists = false;
+				//bool exists = false;
+				//bool nextExists = false;
 
-				if (m_dictionary.find(currentWord) != m_dictionary.end())
-				{
-					// current word already exists in the dictionary
-					exists = true;
+				//if (m_dictionary.find(currentWord) != m_dictionary.end())
+				//{
+				//	// current word already exists in the dictionary
+				//	exists = true;
 
-					// check to make sure nextWord doesn't already exist as a next word for this word
-					if (m_dictionary.find(currentWord)->second.nextWords.find(nextWord) != m_dictionary.find(currentWord)->second.nextWords.end())
-					{
-						// next word already exists for this word
-						nextExists = true;
-						m_dictionary.find(currentWord)->second.nextWords[nextWord]++;
-					}
+				//	// check to make sure nextWord doesn't already exist as a next word for this word
+				//	if (m_dictionary.find(currentWord)->second.nextWords.find(nextWord) != m_dictionary.find(currentWord)->second.nextWords.end())
+				//	{
+				//		// next word already exists for this word
+				//		nextExists = true;
+				//		m_dictionary.find(currentWord)->second.nextWords[nextWord]++;
+				//	}
 
-					// the next word has never been seen before after an instance of the current word
-					if (!nextExists)
-					{
-						// add it as the first occurance
-						m_dictionary.find(currentWord)->second.nextWords[nextWord] = 1;
-					}
-				}
+				//	// the next word has never been seen before after an instance of the current word
+				//	if (!nextExists)
+				//	{
+				//		// add it as the first occurance
+				//		m_dictionary.find(currentWord)->second.nextWords[nextWord] = 1;
+				//	}
+				//}
 
-				if (!exists)
-				{
+				//if (!exists)
+				//{
 					// add the current word along with the next word
-					m_dictionary[currentWord] = DictionaryEntry(currentWord, nextWord);
-				}
+					m_dictionary[currentWord].addNextWord(nextWord);
+				//}
 			}
 		}
 	}
@@ -102,7 +102,7 @@ void MarkovChain::writeToFile(const char* filename)
 }
 
 // generates text using the pre calculated dictionary
-void MarkovChain::generateText(int numberOfWords)
+void MarkovChain::generateText(unsigned int numberOfWords)
 {
 	std::string currentWord = m_dictionary.begin()->first;
 
@@ -111,10 +111,46 @@ void MarkovChain::generateText(int numberOfWords)
 		// get a random next word
 		printf(currentWord.c_str());
 		printf(" ");
-		currentWord = m_dictionary[currentWord].getRandomNextWord();
+		if (m_dictionary[currentWord].nextWords.size() != 0)
+		{
+			currentWord = m_dictionary[currentWord].getRandomNextWord();
+		}
+		else
+		{
+			// if there is nothing to jump to just go back to the beginning
+			std::string currentWord = m_dictionary.begin()->first;
+		}
 	}
 
 	printf("\n");
+}
+
+// read a word from the file
+std::string MarkovChain::readWord()
+{
+	std::string word = "";
+	/*char c;
+
+	while (!m_file.eof())
+	{
+		m_file.read(&c, 1);
+
+		if (m_file.eof())
+		{
+			break;
+		}
+
+		if (c == '\n' || c == ' ')
+		{
+			break;
+		}
+
+		word += c;
+	}*/
+
+	m_file >> word;
+
+	return word;
 }
 
 // read a word from the file without changing the position in the file
@@ -133,36 +169,6 @@ std::string MarkovChain::peekWord()
 
 	// return to position
 	m_file.seekg(position);
-
-	return word;
-}
-
-// read a word from the file
-std::string MarkovChain::readWord()
-{
-	/*std::string word = "";
-	char c;
-
-	while (true)
-	{
-		m_file.read(&c, 1);
-
-		if (m_file.eof())
-		{
-			break;
-		}
-
-		if (c == '\n' || c == ' ')
-		{
-			break;
-		}
-
-		word += c;
-	}*/
-
-	std::string word;
-
-	m_file >> word;
 
 	return word;
 }

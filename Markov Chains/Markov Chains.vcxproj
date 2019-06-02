@@ -140,12 +140,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="source\CharacterMarkovChain.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\MarkovChain.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\CharacterMarkovChain.h" />
     <ClInclude Include="source\DictionaryEntry.h" />
     <ClInclude Include="source\MarkovChain.h" />
   </ItemGroup>

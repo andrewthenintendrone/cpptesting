@@ -15,14 +15,14 @@ public:
 
 	void writeToFile(const char* filename);
 
-	void generateText(int numberOfWords);
+	void generateText(unsigned int numberOfWords);
 
 private:
 
 	std::ifstream m_file;
 
-	std::string peekWord();
 	std::string readWord();
+	std::string peekWord();
 
 	std::unordered_map<std::string, DictionaryEntry> m_dictionary;
 };

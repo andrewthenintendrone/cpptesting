@@ -344,3 +344,5 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+*.idb
+*.tlog
