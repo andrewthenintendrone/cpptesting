@@ -14,6 +14,7 @@ public:
 	void changeColors(Color colora, Color colorb, Color colorn);
 
 	void printColors();
+	void printColorsUnity();
 
 private:
 

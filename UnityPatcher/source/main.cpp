@@ -49,36 +49,47 @@ uint8_t* getFileBuffer(const std::string& filename, int& filesize)
 void modifyBuffer(uint8_t* buffer, int& filesize)
 {
 	// find and replace the magic numbers in the buffer
-	uint8_t expectedBuffer1[15] = { 0x84, 0xC0, 0x75, 0x08, 0x33, 0xC0, 0x48, 0x83, 0xC4, 0x20, 0x5B, 0xC3, 0x8B, 0x03, 0x48 };
-	uint8_t expectedBuffer2[15] = { 0x84, 0xC0, 0x75, 0x08, 0x33, 0xC0, 0x48, 0x83, 0xC4, 0x30, 0x5B, 0xC3, 0x8B, 0x03, 0x48 };
+	uint8_t expectedBuffer2017[15] = { 0x84, 0xC0, 0x75, 0x08, 0x33, 0xC0, 0x48, 0x83, 0xC4, 0x20, 0x5B, 0xC3, 0x8B, 0x03, 0x48 };
+	uint8_t expectedBuffer2018[15] = { 0x84, 0xC0, 0x75, 0x08, 0x33, 0xC0, 0x48, 0x83, 0xC4, 0x30, 0x5B, 0xC3, 0x8B, 0x03, 0x48 };
+	uint8_t expectedBuffer2019[15] = { 0x84, 0xDB, 0x74, 0x04, 0x33, 0xC0, 0xEB, 0x02, 0x8B, 0x07, 0x4C, 0x8D, 0x5C, 0x24, 0x70 };
 
 	// don't run off the end
 	for (int currentOffset = 0; currentOffset < filesize - 15; currentOffset++)
 	{
-		bool foundMagic1 = true;
-		bool foundMagic2 = true;
+		bool foundMagic2017 = true;
+		bool foundMagic2018 = true;
+		bool foundMagic2019 = true;
 
 		for (size_t i = 0; i < 15; i++)
 		{
-			if (buffer[currentOffset + i] != expectedBuffer1[i])
+			if (buffer[currentOffset + i] != expectedBuffer2017[i])
 			{
-				foundMagic1 = false;
+				foundMagic2017 = false;
 			}
-			if (buffer[currentOffset + i] != expectedBuffer2[i])
+			if (buffer[currentOffset + i] != expectedBuffer2018[i])
 			{
-				foundMagic2 = false;
+				foundMagic2018 = false;
+			}
+			if (buffer[currentOffset + i] != expectedBuffer2019[i])
+			{
+				foundMagic2019 = false;
 			}
 
-			if (!(foundMagic1 || foundMagic2))
+			if (!(foundMagic2017 || foundMagic2018 || foundMagic2019))
 			{
 				break;
 			}
 		}
 
 		// change the third byte from 0x75 to 0x74
-		if (foundMagic1 || foundMagic2)
+		if (foundMagic2017 || foundMagic2018)
 		{
 			buffer[currentOffset + 2] = 0x74;
+			break;
+		}
+		if (foundMagic2019)
+		{
+			buffer[currentOffset + 2] = 0x75;
 			break;
 		}
 	}

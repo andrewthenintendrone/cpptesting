@@ -22,6 +22,7 @@ public:
 	Model(std::vector<glm::vec3> verts, std::vector<glm::vec2> uvs, std::vector<int> indices);
 
 	static Model createModelFromSprite(const std::string& filename, float meshHeight);
+	static Model createModelFromSprite2(const std::string& filename, float meshHeight);
 
 	void loadRaw(const std::string& filename, int startAddress = 0, int endAddress = 0);
 	void loadOBJ(const std::string& filename);

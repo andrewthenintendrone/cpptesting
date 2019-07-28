@@ -313,6 +313,52 @@ Model Model::createModelFromSprite(const std::string& filename, float meshHeight
 	return model;
 }
 
+Model Model::createModelFromSprite2(const std::string& filename, float meshHeight)
+{
+	// create model
+	Model model;
+
+	// open sprite
+	Image img(filename.c_str());
+
+	float width = img.getWidth();
+	float height = img.getHeight();
+
+	// create grid
+	for (int y = 0; y < height + 1; y++)
+	{
+		for (int x = 0; x < width + 1; x++)
+		{
+			model.m_verts.push_back(glm::vec3(x, 0, y));
+			model.m_uvs.push_back(glm::vec2((float)x / (float)width, 1.0f - (float)y / (float)height));
+		}
+	}
+
+
+
+	// create indices
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			int i = (width + 1) * y + x;
+			int i2 = i + 1;
+			int i3 = i + width + 1;
+			int i4 = i3 + 1;
+
+			model.m_indices.push_back(i);
+			model.m_indices.push_back(i2);
+			model.m_indices.push_back(i3);
+
+			model.m_indices.push_back(i3);
+			model.m_indices.push_back(i2);
+			model.m_indices.push_back(i4);
+		}
+	}
+
+	return model;
+}
+
 void Model::loadRaw(const std::string& filename, int startAddress /* 0 */, int endAddress /* 0 */)
 {
 	BinaryReader reader(filename);
@@ -323,21 +369,29 @@ void Model::loadRaw(const std::string& filename, int startAddress /* 0 */, int e
 		endAddress = (int)reader.getFileSize();
 	}
 
-	uint16_t x = 0;
+	int vecCount = 50;
 
 	// read data as verts 
-	while (reader.getFileOffset() < endAddress - sizeof(uint16_t))
+	while (reader.getFileOffset() < endAddress - sizeof(glm::vec3))
 	{
-		uint16_t y = reader.readUint16();
+		glm::vec3 currentVector;
 
-		glm::vec3 currentVector((float)x, (float)y, 0);
+		currentVector.x = reader.readSingle();
+		currentVector.y = reader.readSingle();
+		currentVector.z = reader.readSingle();
 
 		if (validVector(currentVector))
 		{
+			if (glm::length(currentVector) >= 0.99f && glm::length(currentVector) <= 1.01f)
+			{
+				if (vecCount > 0)
+				{
+					std::cout << "normal vector at " << reader.getFileOffset() << std::endl;
+					vecCount--;
+				}
+			}
 			m_verts.push_back(currentVector);
 		}
-
-		x++;
 	}
 }
 

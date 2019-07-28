@@ -159,3 +159,43 @@ void bprmFile::printColors()
 
 	file.close();
 }
+
+void bprmFile::printColorsUnity()
+{
+	std::ofstream file;
+	file.open("C:\\Users\\Andrew\\Downloads\\splatoon2\\update\\out\\Param\\TeamColor\\team colors.txt", std::ios::app);
+
+	if (!file.is_open())
+	{
+		std::cout << "Couldn't open C:\\Users\\Andrew\\Downloads\\splatoon2\\update\\out\\Param\\TeamColor\\team colors.txt" << std::endl;
+	}
+
+	// TeamColorA
+	std::cout << "public static Color " << fs::path(m_filename).stem().string() << "_A() { ";
+	std::cout << "return new Color(";
+	std::cout << m_teamColorA.r << "f, " << m_teamColorA.g << "f, " << m_teamColorA.b << "f); }\n\n";
+
+	file << "public static Color " << fs::path(m_filename).stem().string() << "_A() { ";
+	file << "return new Color(";
+	file << m_teamColorA.r << "f, " << m_teamColorA.g << "f, " << m_teamColorA.b << "f); }\n\n";
+
+	// TeamColorB
+	std::cout << "public static Color " << fs::path(m_filename).stem().string() << "_B() { ";
+	std::cout << "return new Color(";
+	std::cout << m_teamColorB.r << "f, " << m_teamColorB.g << "f, " << m_teamColorB.b << "f); }\n\n";
+
+	file << "public static Color " << fs::path(m_filename).stem().string() << "_B() { ";
+	file << "return new Color(";
+	file << m_teamColorB.r << "f, " << m_teamColorB.g << "f, " << m_teamColorB.b << "f); }\n\n";
+
+	// TeamColorN
+	std::cout << "public static Color " << fs::path(m_filename).stem().string() << "_N() { ";
+	std::cout << "return new Color(";
+	std::cout << m_teamColorN.r << "f, " << m_teamColorN.g << "f, " << m_teamColorN.b << "f); }\n\n";
+
+	file << "public static Color " << fs::path(m_filename).stem().string() << "_N() { ";
+	file << "return new Color(";
+	file << m_teamColorN.r << "f, " << m_teamColorN.g << "f, " << m_teamColorN.b << "f); }\n\n";
+
+	file.close();
+}

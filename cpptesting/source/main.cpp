@@ -1,15 +1,20 @@
 #include <iostream>
-#include "Model.h"
-#include <iomanip>
+//#include "Model.h"
+#include <experimental/filesystem>
+#include "bprmFile.h"
+
+namespace fs = std::experimental::filesystem;
 
 int main(int argc, char* argv[])
 {
-	if (argc > 1)
+	for (auto& p : fs::directory_iterator("C:\\Users\\Andrew\\Downloads\\splatoon2\\update\\out\\Param\\TeamColor"))
 	{
-		Model model = Model::createModelFromSprite(argv[1], 1.0f);
-		std::string filename = argv[1];
-		filename = filename.substr(0, filename.length() - 4) + ".obj";
-		model.writeOBJ(filename.c_str());
+		if (p.path().has_extension() && p.path().extension() == ".bprm")
+		{
+			bprmFile bprm;
+			bprm.readFile(p.path().string());
+			bprm.printColors();
+		}
 	}
 
 	std::cin.get();

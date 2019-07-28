@@ -106,9 +106,10 @@ void MarkovChain::generateText(unsigned int numberOfWords)
 {
 	std::string currentWord = m_dictionary.begin()->first;
 
-	for (size_t i = 0; i < numberOfWords; i++)
+	for (size_t i = 0; i < numberOfWords;)
 	{
 		// get a random next word
+		i += currentWord.length() + 1;
 		printf(currentWord.c_str());
 		printf(" ");
 		if (m_dictionary[currentWord].nextWords.size() != 0)
